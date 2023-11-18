@@ -31,11 +31,16 @@ assignRouter.post("/:id", (request, response) => {
       MentorName: mentor.mentorName,
       students: mentorStudents,
     });
-    assignMentors.save().then(() => {
-      response.json({
-        message: `Assigning students for ${mentor.mentorName} is sucessfully completed`,
+    assignMentors
+      .save()
+      .then(() => {
+        response.status(201).json({
+          message: `Assigning students for ${mentor.mentorName} is sucessfully completed`,
+        });
+      })
+      .catch((err) => {
+        response.status(404).json({ message: "invalid id" });
       });
-    });
   });
 });
 
@@ -50,10 +55,23 @@ studentRouter.patch("/:Studentid/:mentorId", (request, response) => {
         assignedMentor: mentor.mentorName,
         previousMentor: [...student.previousMentor, student.assignedMentor],
       };
-      students.findByIdAndUpdate(stuId, updateMentor).then(() => {
-        response.json({ message: "Update mentor sucessfully" });
-      });
+      students
+        .findByIdAndUpdate(stuId, updateMentor)
+        .then(() => {
+          response.json({ message: "Update mentor sucessfully" });
+        })
+        .catch((err) => {
+          response.status(404).json({ message: "invalid id" });
+        });
     });
+  });
+});
+
+// to show all students for a particular mentor
+assignRouter.get("/:id", (request, response) => {
+  const id = request.params.id;
+  assignMentor.findById(id).then((detail) => {
+    response.status(200).json(detail.students);
   });
 });
 
